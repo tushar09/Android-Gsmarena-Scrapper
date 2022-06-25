@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < table.size(); i++) {
                         Element link = table.get(i).select("> a").first();
                         Element count = link.select("span").first();
-                        //Log.e("asdf", table.get(i).text() + " " + link.attr("href"));
-                        Log.e("asdf", count.text());
                         PhoneBrand pb = new PhoneBrand();
                         pb.setName(link.text().replaceAll(count.text(), "").trim());
                         pb.setTotalItem(Integer.parseInt(count.text().replaceAll("devices", "").trim()));
@@ -70,8 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
-        //BackgroundService.startWork(MainActivity.this);
 
 
     }
