@@ -17,6 +17,8 @@ import com.captaindroid.gsmarena.scrapper.activities.MainActivity;
 import com.captaindroid.gsmarena.scrapper.db.DbClient;
 import com.captaindroid.gsmarena.scrapper.db.dao.MainDao;
 import com.captaindroid.gsmarena.scrapper.db.tables.PageAllDevices;
+import com.captaindroid.gsmarena.scrapper.db.tables.PhoneBrand;
+import com.captaindroid.gsmarena.scrapper.db.tables.PhoneModel;
 import com.captaindroid.gsmarena.scrapper.utils.Constants;
 
 import org.jsoup.Jsoup;
@@ -57,34 +59,85 @@ public class BackgroundService extends JobIntentService {
     }
 
     private void insertFirstPagesOfAllDevices(){
-        List<String> phoneBrands = mainDao.getAllPhoneBrandLinkList();
-        List<PageAllDevices> pageAllDevices = new ArrayList<>();
-        for (int i = 0; i < phoneBrands.size(); i++) {
-            PageAllDevices pad = new PageAllDevices();
-            pad.setLink(phoneBrands.get(i));
-            pageAllDevices.add(pad);
-        }
-        mainDao.insertPageAllDevices(pageAllDevices);
-        pageAllDevices.clear();
-        pageAllDevices.addAll(mainDao.getAllPages());
+        List<PhoneBrand> phoneBrands = mainDao.getAllPhoneBrandLinkList();
+        List<PhoneBrand> phoneBrandsNotDoneAll = mainDao.getAllPhoneBrandNotDoneLinkList();
+        Log.e("phone brand", phoneBrands.size() + "");
+        Log.e("phone brand not", phoneBrandsNotDoneAll.size() + "");
+        if(phoneBrands.size() == 0 || phoneBrandsNotDoneAll.size() > 0){
+            Log.e("phone brand", "GOt inside");
+            List<PageAllDevices> pageAllDevices = new ArrayList<>();
+            for (int i = 0; i < phoneBrands.size(); i++) {
+                PageAllDevices pad = new PageAllDevices();
+                pad.setLink(phoneBrands.get(i).getLink());
+                pad.setBrandName(phoneBrands.get(i).getName());
+                pageAllDevices.add(pad);
+            }
+            mainDao.insertPageAllDevices(pageAllDevices);
+            pageAllDevices.clear();
+            pageAllDevices.addAll(mainDao.getAllPages());
 
-        for (PageAllDevices pageAllDevice : pageAllDevices) {
+            for (int i = 0; i < pageAllDevices.size(); i++) {
+                Document doc = null;
+                try {
+                    Log.e("hitting", "https://www.gsmarena.com/" + pageAllDevices.get(i).getLink());
+                    doc = Jsoup.connect("https://www.gsmarena.com/" + pageAllDevices.get(i).getLink())
+                            .headers(Constants.getHeaders())
+                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
+                            .get();
+                    Element nav = doc.getElementsByClass("nav-pages").first();
+                    if(nav != null){
+                        //Log.e("size", nav.select("> a").size() + " " + nav.text());
+                        for (int x = 0; x < nav.select("> a").size(); x++) {
+                            PageAllDevices pd = new PageAllDevices();
+                            pd.setLink(nav.select("> a").get(x).attr("href"));
+                            pd.setBrandName(pageAllDevices.get(i).getBrandName());
+                            mainDao.insertPageAllDevices(pd);
+                            Log.e("a", nav.select("> a").get(x).attr("href"));
+                        }
+
+                    }
+                    mainDao.updatePhoneBrandToDone(pageAllDevices.get(i).getLink());
+
+                } catch (IOException e) {
+                    Log.e("e", e.getMessage());
+                    i--;
+                }
+            }
+        }
+
+
+        List<PageAllDevices> pageAllDevices = mainDao.getAllPages();
+        Log.e("page size", pageAllDevices.size() + "");
+
+        for (int i = 0; i < pageAllDevices.size(); i++) {
+            Log.e("e " + i, pageAllDevices.get(i).getLink());
             Document doc = null;
             try {
-                Log.e("hitting", "https://www.gsmarena.com/" + pageAllDevice.getLink());
-                doc = Jsoup.connect("https://www.gsmarena.com/" + pageAllDevice.getLink())
+                doc = Jsoup.connect("https://www.gsmarena.com/" + pageAllDevices.get(i).getLink())
                         .headers(Constants.getHeaders())
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                         .get();
-                Element nav = doc.getElementsByClass("nav-pages").first();
-                Log.e("size", nav.select("> a").size() + " " + nav.text());
-                for (int i = 0; i < nav.select("> a").size(); i++) {
-                    Log.e("a", nav.select("> a").get(i).attr("href"));
+
+                Element main = doc.getElementsByClass("makers").first();
+                Elements allPhones = main.select("ul li");
+
+                ArrayList<PhoneModel> phoneModels = new ArrayList<>();
+                for (int j = 0; j < allPhones.size(); j++) {
+                    PhoneModel pm = new PhoneModel();
+                    pm.setBrandName(pageAllDevices.get(i).getBrandName());
+                    pm.setPhoneModelName(allPhones.get(j).select("strong").text());
+                    pm.setDetailsLink(allPhones.get(j).select("> a").attr("href"));
+                    pm.setImageLink(allPhones.get(j).select("img").attr("src"));
+                    pm.setToolTips(allPhones.get(j).select("img").attr("title"));
+                    phoneModels.add(pm);
+                    Log.e(pageAllDevices.get(i).getBrandName(), allPhones.get(j).select("img").attr("title"));
+                    mainDao.insertPhoneModels(phoneModels);
                 }
             } catch (IOException e) {
-                Log.e("e", e.toString());
+                Log.e("e", e.getMessage());
+                //i--;
+                break;
             }
-            break;
         }
         new Thread(new Runnable() {
             @Override

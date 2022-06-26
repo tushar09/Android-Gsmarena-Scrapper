@@ -1,15 +1,17 @@
 package com.captaindroid.gsmarena.scrapper.db.tables;
 
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity
+@Entity(indices = {@Index(value = {"link"}, unique = true)})
 public class PhoneBrand {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String name;
     private int totalItem;
     private String link;
+    private boolean doneAllPage;
     private long createdAt;
     private long updatedAt;
 
@@ -59,5 +61,13 @@ public class PhoneBrand {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public boolean isDoneAllPage() {
+        return doneAllPage;
+    }
+
+    public void setDoneAllPage(boolean doneAllPage) {
+        this.doneAllPage = doneAllPage;
     }
 }

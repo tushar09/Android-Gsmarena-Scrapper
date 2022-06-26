@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ae8d280c07fc07acf553d9cae3985ddf",
+    "identityHash": "ad3c5be05894f2aaa1f7b460cec96646",
     "entities": [
       {
         "tableName": "PhoneBrand",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `totalItem` INTEGER NOT NULL, `link` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `totalItem` INTEGER NOT NULL, `link` TEXT, `doneAllPage` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -33,6 +33,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "doneAllPage",
+            "columnName": "doneAllPage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "createdAt",
             "columnName": "createdAt",
             "affinity": "INTEGER",
@@ -51,12 +57,22 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_PhoneBrand_link",
+            "unique": true,
+            "columnNames": [
+              "link"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PhoneBrand_link` ON `${TABLE_NAME}` (`link`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
         "tableName": "PageAllDevices",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `link` TEXT, `brandName` TEXT, `doneListingModels` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -69,6 +85,18 @@
             "columnName": "link",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "brandName",
+            "columnName": "brandName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "doneListingModels",
+            "columnName": "doneListingModels",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -80,12 +108,72 @@
         "indices": [
           {
             "name": "index_PageAllDevices_link",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "link"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PageAllDevices_link` ON `${TABLE_NAME}` (`link`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PageAllDevices_link` ON `${TABLE_NAME}` (`link`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "PhoneModel",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `brandName` TEXT, `phoneModelName` TEXT, `imageLink` TEXT, `toolTips` TEXT, `detailsLink` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brandName",
+            "columnName": "brandName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "phoneModelName",
+            "columnName": "phoneModelName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "imageLink",
+            "columnName": "imageLink",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "toolTips",
+            "columnName": "toolTips",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "detailsLink",
+            "columnName": "detailsLink",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_PhoneModel_detailsLink",
+            "unique": true,
+            "columnNames": [
+              "detailsLink"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PhoneModel_detailsLink` ON `${TABLE_NAME}` (`detailsLink`)"
           }
         ],
         "foreignKeys": []
@@ -94,7 +182,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ae8d280c07fc07acf553d9cae3985ddf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad3c5be05894f2aaa1f7b460cec96646')"
     ]
   }
 }

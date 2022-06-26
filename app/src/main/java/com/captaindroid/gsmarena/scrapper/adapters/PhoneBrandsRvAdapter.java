@@ -1,6 +1,7 @@
 package com.captaindroid.gsmarena.scrapper.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.captaindroid.gsmarena.scrapper.activities.BrandDeviceListActivity;
 import com.captaindroid.gsmarena.scrapper.databinding.RowPhoneBrandBinding;
 import com.captaindroid.gsmarena.scrapper.db.tables.PhoneBrand;
 
@@ -33,6 +35,14 @@ public class PhoneBrandsRvAdapter extends RecyclerView.Adapter<PhoneBrandsRvAdap
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         holder.binding.tvTitle.setText(list.get(position).getName());
         holder.binding.tvItemCount.setText(list.get(position).getTotalItem() + " Devices");
+        holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                context.startActivity(new Intent(context, BrandDeviceListActivity.class)
+                        .putExtra("name", list.get(position).getName())
+                );
+            }
+        });
     }
 
     @Override

@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
-
+        //BackgroundService.startWork(MainActivity.this);
     }
 
     private void updateListview(){
