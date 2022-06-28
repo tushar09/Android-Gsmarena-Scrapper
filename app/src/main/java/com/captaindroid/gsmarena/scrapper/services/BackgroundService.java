@@ -106,7 +106,7 @@ public class BackgroundService extends JobIntentService {
         }
 
 
-        List<PageAllDevices> pageAllDevices = mainDao.getAllPages();
+        List<PageAllDevices> pageAllDevices = mainDao.getAllUnDonePage();
         Log.e("page size", pageAllDevices.size() + "");
 
         for (int i = 0; i < pageAllDevices.size(); i++) {
@@ -133,18 +133,12 @@ public class BackgroundService extends JobIntentService {
                     Log.e(pageAllDevices.get(i).getBrandName(), allPhones.get(j).select("img").attr("title"));
                     mainDao.insertPhoneModels(phoneModels);
                 }
-            } catch (IOException e) {
+                mainDao.updatePageToDone(pageAllDevices.get(i).getId(), true);
+            } catch (Exception e) {
                 Log.e("e", e.getMessage());
-                //i--;
-                break;
+                i--;
             }
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }).start();
 
     }
 

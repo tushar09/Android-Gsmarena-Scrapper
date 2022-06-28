@@ -69,6 +69,47 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Document doc = null;
+                try {
+                    doc = Jsoup.connect("https://www.gsmarena.com/samsung_galaxy_s22_ultra_5g-11251.php")
+                            .headers(Constants.getHeaders())
+                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
+                            .get();
+
+                    Element data = doc.getElementById("specs-list");
+                    Elements tables = data.select("table");
+                    for (int i = 0; i < tables.size(); i++) {
+                        Elements row = tables.get(i).select("tr");
+                        for (int j = 0; j < row.size(); j++) {
+                            Element header = row.get(j).select("th").first();
+                            if(header != null){
+                                Log.e("data", row.get(j).select("th").first().text());
+                            }
+
+                            Elements tds = row.get(j).select("td");
+                            for (int k = 0; k < tds.size(); k++) {
+                                Element subHead = tds.get(k).getElementsByClass("ttl").first();
+                                if(subHead != null){
+                                    Log.e("data", "     " + subHead.text());
+                                }
+                                Element nfo = tds.get(k).getElementsByTag("nfo").first();
+                                //Log.e("data", "         " + tds.get(k).text());
+                                Log.e("data", "         " + nfo.html());
+                            }
+
+                        }
+                    }
+
+
+                } catch (Exception e) {
+                    Log.e("exp", e.toString());
+                }
+            }
+        }).start();
+
         //BackgroundService.startWork(MainActivity.this);
     }
 

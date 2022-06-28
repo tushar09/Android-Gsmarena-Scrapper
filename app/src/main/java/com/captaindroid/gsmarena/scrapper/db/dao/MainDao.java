@@ -38,6 +38,12 @@ public interface MainDao {
     @Query("select * from PageAllDevices order by brandName desc")
     List<PageAllDevices> getAllPages();
 
+    @Query("select * from PageAllDevices where doneListingModels = 0 order by brandName desc")
+    List<PageAllDevices> getAllUnDonePage();
+
+    @Query("update PageAllDevices set doneListingModels = :b where id = :id")
+    void updatePageToDone(int id, boolean b);
+
     @Insert(onConflict = REPLACE)
     void insertPhoneModels(ArrayList<PhoneModel> phoneModels);
 
