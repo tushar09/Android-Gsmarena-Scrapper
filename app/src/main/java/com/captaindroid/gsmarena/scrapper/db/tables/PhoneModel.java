@@ -13,6 +13,9 @@ public class PhoneModel {
     private String imageLink;
     private String toolTips;
     private String detailsLink;
+    private String details;
+    private boolean scrappingDone;
+    private boolean uploadToServerDone;
 
     public int getId() {
         return id;
@@ -60,5 +63,29 @@ public class PhoneModel {
 
     public void setDetailsLink(String detailsLink) {
         this.detailsLink = detailsLink;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
+    public boolean isScrappingDone() {
+        return scrappingDone;
+    }
+
+    public void setScrappingDone(boolean scrappingDone) {
+        this.scrappingDone = scrappingDone;
+    }
+
+    public boolean isUploadToServerDone() {
+        return uploadToServerDone;
+    }
+
+    public void setUploadToServerDone(boolean uploadToServerDone) {
+        this.uploadToServerDone = uploadToServerDone;
     }
 }

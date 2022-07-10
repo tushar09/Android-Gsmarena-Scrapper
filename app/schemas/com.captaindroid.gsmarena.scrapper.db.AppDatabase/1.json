@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ad3c5be05894f2aaa1f7b460cec96646",
+    "identityHash": "dfec8a8aeba7adbe701b012431b19e52",
     "entities": [
       {
         "tableName": "PhoneBrand",
@@ -120,7 +120,7 @@
       },
       {
         "tableName": "PhoneModel",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `brandName` TEXT, `phoneModelName` TEXT, `imageLink` TEXT, `toolTips` TEXT, `detailsLink` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `brandName` TEXT, `phoneModelName` TEXT, `imageLink` TEXT, `toolTips` TEXT, `detailsLink` TEXT, `details` TEXT, `scrappingDone` INTEGER NOT NULL, `uploadToServerDone` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -157,6 +157,24 @@
             "columnName": "detailsLink",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "details",
+            "columnName": "details",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "scrappingDone",
+            "columnName": "scrappingDone",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uploadToServerDone",
+            "columnName": "uploadToServerDone",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -182,7 +200,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ad3c5be05894f2aaa1f7b460cec96646')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dfec8a8aeba7adbe701b012431b19e52')"
     ]
   }
 }

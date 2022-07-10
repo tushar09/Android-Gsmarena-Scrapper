@@ -19,22 +19,33 @@ import com.captaindroid.gsmarena.scrapper.db.dao.MainDao;
 import com.captaindroid.gsmarena.scrapper.db.tables.PageAllDevices;
 import com.captaindroid.gsmarena.scrapper.db.tables.PhoneBrand;
 import com.captaindroid.gsmarena.scrapper.db.tables.PhoneModel;
+import com.captaindroid.gsmarena.scrapper.dto.Head;
+import com.captaindroid.gsmarena.scrapper.dto.PhoneConfiguration;
+import com.captaindroid.gsmarena.scrapper.dto.StackClass;
+import com.captaindroid.gsmarena.scrapper.dto.SubHeader;
+import com.captaindroid.gsmarena.scrapper.eventBus.ScrappingStatus;
 import com.captaindroid.gsmarena.scrapper.utils.Constants;
+import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class BackgroundService extends JobIntentService {
 
     private MainDao mainDao;
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
+
+    private static ScrappingStatus scrappingStatus = new ScrappingStatus();
 
     @Override
     public void onCreate() {
@@ -43,6 +54,9 @@ public class BackgroundService extends JobIntentService {
     }
 
     public static void startWork(Context context){
+        scrappingStatus.setIndetermination(true);
+        scrappingStatus.setFinished(false);
+        scrappingStatus.setProgress(0);
         enqueueWork(
                 context,
                 BackgroundService.class,
@@ -80,7 +94,13 @@ public class BackgroundService extends JobIntentService {
                 Document doc = null;
                 try {
                     Log.e("hitting", "https://www.gsmarena.com/" + pageAllDevices.get(i).getLink());
-                    doc = Jsoup.connect("https://www.gsmarena.com/" + pageAllDevices.get(i).getLink())
+
+                    scrappingStatus.setScrappingName("Scrapping " + pageAllDevices.get(i).getBrandName() + ": " + pageAllDevices.get(i).getLink());
+                    EventBus.getDefault().post(scrappingStatus);
+                    mBuilder.setContentText("Scrapping " + pageAllDevices.get(i).getBrandName() + ": " + pageAllDevices.get(i).getLink());
+                    mNotificationManager.notify(1, mBuilder.build());
+
+                    doc = Jsoup.connect("https://www.gsmarena.com/" + URLEncoder.encode(pageAllDevices.get(i).getLink()) )
                             .headers(Constants.getHeaders())
                             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                             .get();
@@ -100,6 +120,15 @@ public class BackgroundService extends JobIntentService {
 
                 } catch (IOException e) {
                     Log.e("e", e.getMessage());
+                    scrappingStatus.setScrappingName("Please connect / or change the vpn connection");
+                    EventBus.getDefault().post(scrappingStatus);
+                    mBuilder.setContentText("Please connect / or change the vpn connection");
+                    mNotificationManager.notify(1, mBuilder.build());
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
                     i--;
                 }
             }
@@ -113,7 +142,13 @@ public class BackgroundService extends JobIntentService {
             Log.e("e " + i, pageAllDevices.get(i).getLink());
             Document doc = null;
             try {
-                doc = Jsoup.connect("https://www.gsmarena.com/" + pageAllDevices.get(i).getLink())
+
+                scrappingStatus.setScrappingName("Scrapping " + pageAllDevices.get(i).getBrandName() + ": " + pageAllDevices.get(i).getLink());
+                EventBus.getDefault().post(scrappingStatus);
+                mBuilder.setContentText("Scrapping " + pageAllDevices.get(i).getBrandName() + ": " + pageAllDevices.get(i).getLink());
+                mNotificationManager.notify(1, mBuilder.build());
+
+                doc = Jsoup.connect("https://www.gsmarena.com/" + URLEncoder.encode(pageAllDevices.get(i).getLink()))
                         .headers(Constants.getHeaders())
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                         .get();
@@ -135,8 +170,139 @@ public class BackgroundService extends JobIntentService {
                 }
                 mainDao.updatePageToDone(pageAllDevices.get(i).getId(), true);
             } catch (Exception e) {
-                Log.e("e", e.getMessage());
+                scrappingStatus.setScrappingName("Please connect / or change the vpn connection");
+                EventBus.getDefault().post(scrappingStatus);
+                mBuilder.setContentText("Please connect / or change the vpn connection");
+                mNotificationManager.notify(1, mBuilder.build());
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
                 i--;
+            }
+        }
+
+        List<PhoneModel> phoneModels = mainDao.getAllPhoneModelsWhichAreNotDoneScrapping();
+        for (int l = 0; l < phoneModels.size(); l++) {
+            Document doc = null;
+            Stack<StackClass> stack = new Stack<StackClass>();
+            try {
+
+                double totalSize = mainDao.getCountPhoneModel();
+                double totalSizeDone = mainDao.getCountPhoneModelDoneScrapping();
+
+                scrappingStatus.setScrappingName("Scrapping " + phoneModels.get(l).getBrandName() + ": " + phoneModels.get(l).getPhoneModelName());
+                scrappingStatus.setPhoneImageUrl(phoneModels.get(l).getImageLink());
+                scrappingStatus.setProgress((int) ((totalSizeDone / totalSize) * 100));
+                scrappingStatus.setIndetermination(false);
+                EventBus.getDefault().post(scrappingStatus);
+                mBuilder.setContentText("Scrapping " + phoneModels.get(l).getBrandName() + ": " + phoneModels.get(l).getPhoneModelName());
+                mNotificationManager.notify(1, mBuilder.build());
+
+                String url = "https://www.gsmarena.com/" + URLEncoder.encode(phoneModels.get(l).getDetailsLink(), "UTF-8");
+                //String url = "https://www.gsmarena.com/" + phoneModels.get(l).getDetailsLink().replaceAll("\\[", "%5B").replaceAll("]", "%5D");
+                Log.e("details", url);
+                doc = Jsoup.connect(url)
+                        .headers(Constants.getHeaders())
+                        .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
+                        .get();
+
+                Element data = doc.getElementById("specs-list");
+                Elements tables = data.select("table");
+
+                for (int i = 0; i < tables.size(); i++) {
+                    Elements row = tables.get(i).select("tr");
+                    for (int j = 0; j < row.size(); j++) {
+                        Element header = row.get(j).select("th").first();
+                        PhoneConfiguration phoneConfiguration = new PhoneConfiguration();
+                        if(header != null){
+                            StackClass exp = new StackClass(row.get(j).select("th").first().text(), 1);
+                            stack.push(exp);
+                        }
+
+                        Elements tds = row.get(j).select("td");
+                        for (int k = 0; k < tds.size(); k++) {
+                            Element subHead = tds.get(k).getElementsByClass("ttl").first();
+                            if(subHead != null){
+                                StackClass exp = new StackClass(subHead.text(), 2);
+                                stack.push(exp);
+                            }
+                            Element a = tds.get(k).select("> a").first();
+                            if(subHead != null && a != null && a.text().equals(subHead.text())){
+                                //Log.e("data", "         " + tds.get(k).html());
+                            }else{
+                                StackClass exp = new StackClass(tds.get(k).html(), 3);
+                                stack.push(exp);
+                                Log.e("data", "         " + tds.get(k).html());
+                            }
+
+                            //Log.e("data", "         " + nfo.html());
+                        }
+
+                    }
+                }
+
+                ArrayList<String> strings = new ArrayList<>();
+                ArrayList<SubHeader> subHeads = new ArrayList<>();
+                String head;
+                PhoneConfiguration phoneConfiguration = new PhoneConfiguration();
+                ArrayList<Head> heads = new ArrayList<>();
+                phoneConfiguration.setHeads(heads);
+                while (stack.size() > 0){
+                    if(stack.peek().getType() == 3){
+                        strings.add(stack.pop().getData());
+                    }else if(stack.peek().getType() == 2){
+                        SubHeader subHead = new SubHeader();
+                        subHead.setName(stack.pop().getData());
+                        subHead.setData(strings);
+
+                        subHeads.add(subHead);
+
+                        strings = new ArrayList<>();
+
+                    }else{
+                        Head h = new Head();
+                        h.setName(stack.pop().getData());
+                        h.setSubHeaders(subHeads);
+
+                        subHeads = new ArrayList<>();
+
+                        phoneConfiguration.getHeads().add(h);
+                    }
+
+                }
+
+                mainDao.updatePhoneModelDataDetails(new Gson().toJson(phoneConfiguration), phoneModels.get(l).getId());
+
+                int maxLogSize = 1000;
+                for(int i = 0; i <= new Gson().toJson(phoneConfiguration).length() / maxLogSize; i++) {
+                    int start = i * maxLogSize;
+                    int end = (i+1) * maxLogSize;
+                    end = end > new Gson().toJson(phoneConfiguration).length() ? new Gson().toJson(phoneConfiguration).length() : end;
+                    Log.e("pc", new Gson().toJson(phoneConfiguration).substring(start, end));
+                }
+
+
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+
+
+            } catch (Exception e) {
+                l--;
+                scrappingStatus.setScrappingName("Please connect / or change the vpn connection");
+                EventBus.getDefault().post(scrappingStatus);
+                mBuilder.setContentText("Please connect / or change the vpn connection");
+                mNotificationManager.notify(1, mBuilder.build());
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+                Log.e("exp", e.toString());
             }
         }
 
