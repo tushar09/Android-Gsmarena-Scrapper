@@ -1,6 +1,7 @@
 package com.captaindroid.gsmarena.scrapper.db.tables;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -14,6 +15,9 @@ public class PhoneBrand {
     private boolean doneAllPage;
     private long createdAt;
     private long updatedAt;
+
+    @Ignore
+    private boolean newPhoneAvailable;
 
     public int getId() {
         return id;
@@ -69,5 +73,13 @@ public class PhoneBrand {
 
     public void setDoneAllPage(boolean doneAllPage) {
         this.doneAllPage = doneAllPage;
+    }
+
+    public boolean isNewPhoneAvailable() {
+        return newPhoneAvailable;
+    }
+
+    public void setNewPhoneAvailable(boolean newPhoneAvailable) {
+        this.newPhoneAvailable = newPhoneAvailable;
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -47,6 +48,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
 
@@ -194,8 +198,24 @@ public class MainActivity extends AppCompatActivity {
                         phoneBrands.add(pb);
                     }
                     updateListview();
-                    DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().insertBook(phoneBrands);
+                    mainDao.insertBook(phoneBrands);
+
+                    for (int i = 0; i < phoneBrands.size(); i++) {
+                        if(phoneBrands.get(i).getTotalItem() > mainDao.getPhoneBrandTotalItem(phoneBrands.get(i).getName())){
+                            phoneBrands.get(i).setNewPhoneAvailable(true);
+                            mainDao.updatePageAllDevicesToUndone(phoneBrands.get(i).getLink());
+                        }
+                    }
+                    Collections.sort(phoneBrands, new Comparator<PhoneBrand>() {
+                        @Override
+                        public int compare(PhoneBrand t0, PhoneBrand t1) {
+                            return Boolean.compare(t1.isNewPhoneAvailable(), t0.isNewPhoneAvailable());
+                        }
+                    });
+                    updateListview();
+
                     BackgroundService.startWork(MainActivity.this);
+
 
                 } catch (IOException e) {
                     BackgroundService.startWork(MainActivity.this);
@@ -315,7 +335,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onWallpaperUpdate(ScrappingStatus dto){
+    public void onPhoneUpdate(ScrappingStatus dto){
         if(dto.isFinished() == false){
             binding.cvDownloadStatus.setVisibility(View.VISIBLE);
             binding.tvStatus.setText(dto.getScrappingName());

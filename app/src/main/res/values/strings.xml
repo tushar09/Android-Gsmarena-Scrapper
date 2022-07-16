@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GsmArenaScrapper</string>
+    <string name="new_phone_available">New phone availabe</string>
 </resources>

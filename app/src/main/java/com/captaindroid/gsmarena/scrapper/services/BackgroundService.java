@@ -165,9 +165,12 @@ public class BackgroundService extends JobIntentService {
                     pm.setImageLink(allPhones.get(j).select("img").attr("src"));
                     pm.setToolTips(allPhones.get(j).select("img").attr("title"));
                     phoneModels.add(pm);
-                    Log.e(pageAllDevices.get(i).getBrandName(), allPhones.get(j).select("img").attr("title"));
-                    mainDao.insertPhoneModels(phoneModels);
+                    //Log.e(pageAllDevices.get(i).getBrandName(), allPhones.get(j).select("img").attr("title"));
                 }
+//                for (int k = 0; k < phoneModels.size(); k++) {
+//                    Log.e("info " + phoneModels.get(k).getPhoneModelName(), mainDao.isContainsPhoneModel(phoneModels.get(k).getDetailsLink()));
+//                }
+                mainDao.insertPhoneModels(phoneModels);
                 mainDao.updatePageToDone(pageAllDevices.get(i).getId(), true);
             } catch (Exception e) {
                 scrappingStatus.setScrappingName("Please connect / or change the vpn connection");

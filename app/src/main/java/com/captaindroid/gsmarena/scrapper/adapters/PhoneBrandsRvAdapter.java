@@ -35,6 +35,13 @@ public class PhoneBrandsRvAdapter extends RecyclerView.Adapter<PhoneBrandsRvAdap
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         holder.binding.tvTitle.setText(list.get(position).getName());
         holder.binding.tvItemCount.setText(list.get(position).getTotalItem() + " Devices");
+
+        if(list.get(position).isNewPhoneAvailable()){
+            holder.binding.cvNewPhone.setVisibility(View.VISIBLE);
+        }else {
+            holder.binding.cvNewPhone.setVisibility(View.GONE);
+        }
+
         holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

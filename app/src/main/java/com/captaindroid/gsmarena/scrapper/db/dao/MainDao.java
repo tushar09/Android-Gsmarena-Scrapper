@@ -30,6 +30,9 @@ public interface MainDao {
     @Query("select * from PhoneBrand")
     List<PhoneBrand> getAllPhoneBrandLinkList();
 
+    @Query("Select count(*) from PhoneModel where brandName = :brandName")
+    int getPhoneBrandTotalItem(String brandName);
+
     @Query("select * from PhoneBrand where doneAllPage = 0")
     List<PhoneBrand> getAllPhoneBrandNotDoneLinkList();
 
@@ -45,7 +48,7 @@ public interface MainDao {
     @Query("update PageAllDevices set doneListingModels = :b where id = :id")
     void updatePageToDone(int id, boolean b);
 
-    @Insert(onConflict = REPLACE)
+    @Insert(onConflict = IGNORE)
     void insertPhoneModels(ArrayList<PhoneModel> phoneModels);
 
     @Query("select * from PhoneModel")
@@ -72,6 +75,8 @@ public interface MainDao {
     @Update
     void updatePhoneModels(List<PhoneModel> models);
 
+    @Query("update PageAllDevices set doneListingModels = 0 where link = :pageLink")
+    void updatePageAllDevicesToUndone(String pageLink);
 
 
 
@@ -83,4 +88,7 @@ public interface MainDao {
 
     @Query("update PhoneModel set uploadToServerDone = 0")
     void updateServerUploadFalse();
+
+    @Query("select count(*) from PhoneModel where detailsLink = :detailsLink")
+    String isContainsPhoneModel(String detailsLink);
 }
