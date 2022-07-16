@@ -71,4 +71,16 @@ public interface MainDao {
 
     @Update
     void updatePhoneModels(List<PhoneModel> models);
+
+
+
+
+
+
+
+
+
+
+    @Query("update PhoneModel set uploadToServerDone = 0")
+    void updateServerUploadFalse();
 }

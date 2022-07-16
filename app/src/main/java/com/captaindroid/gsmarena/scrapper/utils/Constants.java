@@ -33,6 +33,7 @@ public class Constants {
             //httpClient.addInterceptor(new HeaderInterceptor());
             apiService = new Retrofit
                     .Builder()
+                    //.baseUrl("http://192.168.0.105:8081/")
                     //.baseUrl("http://10.0.2.2:8081/")
                     .baseUrl("https://foxytool.com/")
                     .addConverterFactory(GsonConverterFactory.create())

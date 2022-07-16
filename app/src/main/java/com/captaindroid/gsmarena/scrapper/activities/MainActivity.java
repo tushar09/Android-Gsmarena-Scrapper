@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -63,14 +64,17 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<PhoneBrand> phoneBrands = new ArrayList<>();
     private List<PhoneModel> d;
 
+    private MainDao mainDao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         binding.rvList.setLayoutManager(new LinearLayoutManager(this));
         binding.rvList.setAdapter(new PhoneBrandsRvAdapter(this, phoneBrands));
+
+        mainDao = DbClient.getInstance(MainActivity.this).getAppDatabase().getDao();
 
 //        d = DbClient.getInstance(this).getAppDatabase().getDao().getAllPhoneBrandLinkList();
 //        Constants.getApiService().saveAllPhoneBrands(d)
@@ -86,29 +90,38 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //                });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                d = DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().getAllPhoneModelsWithLimit();
-                while (d.size() > 0){
-                    try {
-                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
-                        if(r.code() == 200){
-                            for (int i = 0; i < d.size(); i++) {
-                                d.get(i).setUploadToServerDone(true);
-                            }
-                        }
-                        Log.e("r", r.code() + " " + "asdf");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().updatePhoneModels(d);
-                    d = DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().getAllPhoneModelsWithLimit();
-                }
-
-            }
-        }).start();
+        //DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().updateServerUploadFalse();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                d = mainDao.getAllPhoneModelsWithLimit();
+//                //Log.e("details link", d.get(0).getDetailsLink());
+//                while (d.size() > 0){
+//                    try {
+//                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
+//                        if(r.code() == 200){
+//                            for (int i = 0; i < d.size(); i++) {
+//                                d.get(i).setUploadToServerDone(true);
+//                            }
+//                        }
+//
+//                        if(r.code() == 422){
+//                            break;
+//                        }
+//                        Log.e("r", r.code() + " " + "asdf");
+//
+//                    }
+//                    catch (IOException e) {
+//                        Log.e("err", e.toString());
+//                        e.printStackTrace();
+//                    }
+//
+//                    mainDao.updatePhoneModels(d);
+//                    d = mainDao.getAllPhoneModelsWithLimit();
+//                }
+//
+//            }
+//        }).start();
 
 
 
@@ -136,8 +149,9 @@ public class MainActivity extends AppCompatActivity {
 //        try {
 //            myObj.createNewFile();
 //            FileWriter myWriter = new FileWriter(myObj);
-//            myWriter.write(new Gson().toJson(pad));
-//            myWriter.close();
+////            myWriter.write(new Gson().toJson(pad));
+////            myWriter.close();
+//            new Gson().toJson(pad, myWriter);
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //            Log.e("err", e.toString());
@@ -156,39 +170,39 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(Intent.createChooser(intent, "sadf"));
 
 
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                Document doc = null;
-//                try {
-//                    doc = Jsoup.connect("https://www.gsmarena.com/makers.php3")
-//                            .headers(Constants.getHeaders())
-//                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
-//                            .get();
-//                    Elements table = doc.select("tbody tr td");
-//                    phoneBrands.clear();
-//                    updateListview();
-//                    for (int i = 0; i < table.size(); i++) {
-//                        Element link = table.get(i).select("> a").first();
-//                        Element count = link.select("span").first();
-//                        PhoneBrand pb = new PhoneBrand();
-//                        pb.setName(link.text().replaceAll(count.text(), "").trim());
-//                        pb.setTotalItem(Integer.parseInt(count.text().replaceAll("devices", "").trim()));
-//                        pb.setLink(link.attr("href"));
-//                        pb.setCreatedAt(System.currentTimeMillis());
-//                        pb.setUpdatedAt(System.currentTimeMillis());
-//                        phoneBrands.add(pb);
-//                    }
-//                    updateListview();
-//                    DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().insertBook(phoneBrands);
-//                    BackgroundService.startWork(MainActivity.this);
-//
-//                } catch (IOException e) {
-//                    BackgroundService.startWork(MainActivity.this);
-//                    Log.e("exp", e.toString());
-//                }
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Document doc = null;
+                try {
+                    doc = Jsoup.connect("https://www.gsmarena.com/makers.php3")
+                            .headers(Constants.getHeaders())
+                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
+                            .get();
+                    Elements table = doc.select("tbody tr td");
+                    phoneBrands.clear();
+                    updateListview();
+                    for (int i = 0; i < table.size(); i++) {
+                        Element link = table.get(i).select("> a").first();
+                        Element count = link.select("span").first();
+                        PhoneBrand pb = new PhoneBrand();
+                        pb.setName(link.text().replaceAll(count.text(), "").trim());
+                        pb.setTotalItem(Integer.parseInt(count.text().replaceAll("devices", "").trim()));
+                        pb.setLink(link.attr("href"));
+                        pb.setCreatedAt(System.currentTimeMillis());
+                        pb.setUpdatedAt(System.currentTimeMillis());
+                        phoneBrands.add(pb);
+                    }
+                    updateListview();
+                    DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().insertBook(phoneBrands);
+                    BackgroundService.startWork(MainActivity.this);
+
+                } catch (IOException e) {
+                    BackgroundService.startWork(MainActivity.this);
+                    Log.e("exp", e.toString());
+                }
+            }
+        }).start();
 
 
 //
