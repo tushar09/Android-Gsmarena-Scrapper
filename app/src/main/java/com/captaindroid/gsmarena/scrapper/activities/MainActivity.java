@@ -95,37 +95,37 @@ public class MainActivity extends AppCompatActivity {
 //                });
 
         //DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().updateServerUploadFalse();
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                d = mainDao.getAllPhoneModelsWithLimit();
-//                //Log.e("details link", d.get(0).getDetailsLink());
-//                while (d.size() > 0){
-//                    try {
-//                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
-//                        if(r.code() == 200){
-//                            for (int i = 0; i < d.size(); i++) {
-//                                d.get(i).setUploadToServerDone(true);
-//                            }
-//                        }
-//
-//                        if(r.code() == 422){
-//                            break;
-//                        }
-//                        Log.e("r", r.code() + " " + "asdf");
-//
-//                    }
-//                    catch (IOException e) {
-//                        Log.e("err", e.toString());
-//                        e.printStackTrace();
-//                    }
-//
-//                    mainDao.updatePhoneModels(d);
-//                    d = mainDao.getAllPhoneModelsWithLimit();
-//                }
-//
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                d = mainDao.getAllPhoneModelsWithLimit();
+                //Log.e("details link", d.get(0).getDetailsLink());
+                while (d.size() > 0){
+                    try {
+                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
+                        if(r.code() == 200){
+                            for (int i = 0; i < d.size(); i++) {
+                                d.get(i).setUploadToServerDone(true);
+                            }
+                        }
+
+                        if(r.code() == 422){
+                            break;
+                        }
+                        Log.e("r", r.code() + " " + "asdf");
+
+                    }
+                    catch (IOException e) {
+                        Log.e("err", e.toString());
+                        e.printStackTrace();
+                    }
+
+                    mainDao.updatePhoneModels(d);
+                    d = mainDao.getAllPhoneModelsWithLimit();
+                }
+
+            }
+        }).start();
 
 
 
