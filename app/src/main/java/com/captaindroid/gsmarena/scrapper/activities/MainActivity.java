@@ -80,52 +80,23 @@ public class MainActivity extends AppCompatActivity {
 
         mainDao = DbClient.getInstance(MainActivity.this).getAppDatabase().getDao();
 
-//        d = DbClient.getInstance(this).getAppDatabase().getDao().getAllPhoneBrandLinkList();
-//        Constants.getApiService().saveAllPhoneBrands(d)
-//                .enqueue(new Callback<PhoneBrand>() {
-//                    @Override
-//                    public void onResponse(Call<PhoneBrand> call, Response<PhoneBrand> response) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<PhoneBrand> call, Throwable t) {
-//
-//                    }
-//                });
+        List<PhoneBrand> brands = DbClient.getInstance(this).getAppDatabase().getDao().getAllPhoneBrandLinkList();
+        Constants.getApiService().saveAllPhoneBrands(brands)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        Log.e("fine", "fine");
+                        uploadToServer();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e("not fine", "fine");
+                    }
+                });
 
         //DbClient.getInstance(MainActivity.this).getAppDatabase().getDao().updateServerUploadFalse();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                d = mainDao.getAllPhoneModelsWithLimit();
-                //Log.e("details link", d.get(0).getDetailsLink());
-                while (d.size() > 0){
-                    try {
-                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
-                        if(r.code() == 200){
-                            for (int i = 0; i < d.size(); i++) {
-                                d.get(i).setUploadToServerDone(true);
-                            }
-                        }
 
-                        if(r.code() == 422){
-                            break;
-                        }
-                        Log.e("r", r.code() + " " + "asdf");
-
-                    }
-                    catch (IOException e) {
-                        Log.e("err", e.toString());
-                        e.printStackTrace();
-                    }
-
-                    mainDao.updatePhoneModels(d);
-                    d = mainDao.getAllPhoneModelsWithLimit();
-                }
-
-            }
-        }).start();
 
 
 
@@ -357,6 +328,40 @@ public class MainActivity extends AppCompatActivity {
         }else {
             binding.cvDownloadStatus.setVisibility(View.GONE);
         }
+    }
+
+    private void uploadToServer(){
+        Log.e("got", "here");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                d = mainDao.getAllPhoneModelsWithLimit();
+                //Log.e("details link", d.get(0).getDetailsLink());
+                while (d.size() > 0){
+                    try {
+                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
+                        if(r.code() == 200){
+                            for (int i = 0; i < d.size(); i++) {
+                                d.get(i).setUploadToServerDone(true);
+                            }
+                        }
+
+                        if(r.code() == 422){
+                            break;
+                        }
+                        Log.e("r", r.code() + " " + "asdf");
+                    }
+                    catch (IOException e) {
+                        Log.e("err", e.toString());
+                        e.printStackTrace();
+                    }
+
+                    mainDao.updatePhoneModels(d);
+                    d = mainDao.getAllPhoneModelsWithLimit();
+                }
+
+            }
+        }).start();
     }
 
     @Override

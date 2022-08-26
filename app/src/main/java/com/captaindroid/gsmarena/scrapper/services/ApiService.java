@@ -11,7 +11,7 @@ import retrofit2.http.POST;
 
 public interface ApiService {
     @POST("/api/v1/phone/addPhoneBrands")
-    Call<PhoneBrand> saveAllPhoneBrands(@Body List<PhoneBrand> brands);
+    Call<Void> saveAllPhoneBrands(@Body List<PhoneBrand> brands);
 
     @POST("/api/v1/phone/addPhoneDetails")
     Call<List<PhoneModel>> saveAllPhoneDetails(@Body List<PhoneModel> models);
