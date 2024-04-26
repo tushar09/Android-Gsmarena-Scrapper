@@ -117,7 +117,11 @@ public class BackgroundService extends JobIntentService {
 
                     }
                     mainDao.updatePhoneBrandToDone(pageAllDevices.get(i).getLink());
-
+                    try {
+                        Thread.sleep(5000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (IOException e) {
                     Log.e("e", e.getMessage());
                     scrappingStatus.setScrappingName("Please connect / or change the vpn connection");
