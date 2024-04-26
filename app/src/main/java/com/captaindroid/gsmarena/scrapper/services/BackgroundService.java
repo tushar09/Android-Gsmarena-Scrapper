@@ -101,6 +101,8 @@ public class BackgroundService extends JobIntentService {
                     mNotificationManager.notify(1, mBuilder.build());
 
                     doc = Jsoup.connect("https://www.gsmarena.com/" + URLEncoder.encode(pageAllDevices.get(i).getLink()) )
+                            .ignoreHttpErrors(true)
+                            .validateTLSCertificates(false)
                             .headers(Constants.getHeaders())
                             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                             .get();
@@ -118,7 +120,7 @@ public class BackgroundService extends JobIntentService {
                     }
                     mainDao.updatePhoneBrandToDone(pageAllDevices.get(i).getLink());
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(500);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();
                     }
@@ -152,7 +154,13 @@ public class BackgroundService extends JobIntentService {
                 mBuilder.setContentText("Scrapping " + pageAllDevices.get(i).getBrandName() + ": " + pageAllDevices.get(i).getLink());
                 mNotificationManager.notify(1, mBuilder.build());
 
+                if(pageAllDevices.get(i).getLink().equals("#")){
+                    continue;
+                }
+                Log.e("err", "https://www.gsmarena.com/" + pageAllDevices.get(i).getLink());
                 doc = Jsoup.connect("https://www.gsmarena.com/" + URLEncoder.encode(pageAllDevices.get(i).getLink()))
+                        .ignoreHttpErrors(true)
+                        .validateTLSCertificates(false)
                         .headers(Constants.getHeaders())
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                         .get();
@@ -177,6 +185,7 @@ public class BackgroundService extends JobIntentService {
                 mainDao.insertPhoneModels(phoneModels);
                 mainDao.updatePageToDone(pageAllDevices.get(i).getId(), true);
             } catch (Exception e) {
+                Log.e("asdf", e.getMessage());
                 scrappingStatus.setScrappingName("Please connect / or change the vpn connection");
                 EventBus.getDefault().post(scrappingStatus);
                 mBuilder.setContentText("Please connect / or change the vpn connection");
@@ -211,6 +220,8 @@ public class BackgroundService extends JobIntentService {
                 //String url = "https://www.gsmarena.com/" + phoneModels.get(l).getDetailsLink().replaceAll("\\[", "%5B").replaceAll("]", "%5D");
                 Log.e("details", url);
                 doc = Jsoup.connect(url)
+                        .ignoreHttpErrors(true)
+                        .validateTLSCertificates(false)
                         .headers(Constants.getHeaders())
                         .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                         .get();

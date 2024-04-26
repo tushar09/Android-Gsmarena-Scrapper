@@ -151,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 Document doc = null;
                 try {
                     doc = Jsoup.connect("https://www.gsmarena.com/makers.php3")
+                            .ignoreHttpErrors(true)
+                            .validateTLSCertificates(false)
                             .headers(Constants.getHeaders())
                             .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36")
                             .get();

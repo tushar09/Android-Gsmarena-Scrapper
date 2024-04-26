@@ -5,10 +5,19 @@ plugins {
 android {
     compileSdk 32
 
+    signingConfigs {
+        signing {
+            storeFile file('gsmarena.jks')
+            keyAlias "gsmarena"
+            storePassword "gsmarena"
+            keyPassword "gsmarena"
+        }
+    }
+
     defaultConfig {
         applicationId "com.captaindroid.gsmarena.scrapper"
         minSdk 21
-        targetSdk 32
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -25,11 +34,15 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            //signingConfig signingConfigs.signing
+        }
+        debug {
+            //signingConfig signingConfigs.signing
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     viewBinding {
