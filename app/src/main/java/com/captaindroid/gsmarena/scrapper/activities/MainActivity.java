@@ -339,7 +339,8 @@ public class MainActivity extends AppCompatActivity {
                 //Log.e("details link", d.get(0).getDetailsLink());
                 while (d.size() > 0){
                     try {
-                        Response<List<PhoneModel>> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
+                        Response<Void> r = Constants.getApiService().saveAllPhoneDetails(d).execute();
+
                         if(r.code() == 200){
                             for (int i = 0; i < d.size(); i++) {
                                 d.get(i).setUploadToServerDone(true);
@@ -352,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("r", r.code() + " " + "asdf");
                     }
                     catch (IOException e) {
+                        Log.e("code", " asdf");
                         Log.e("err", e.toString());
                         e.printStackTrace();
                     }
@@ -359,6 +361,14 @@ public class MainActivity extends AppCompatActivity {
                     mainDao.updatePhoneModels(d);
                     d = mainDao.getAllPhoneModelsWithLimit();
                 }
+
+                try {
+                    Log.e("bnotui", ":gere");
+                    Constants.getApiService().notifyUsers(d.get(0)).execute();
+                }catch (Exception e){
+
+                }
+
 
             }
         }).start();

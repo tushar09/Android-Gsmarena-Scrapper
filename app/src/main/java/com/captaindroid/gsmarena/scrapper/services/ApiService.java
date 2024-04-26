@@ -14,5 +14,8 @@ public interface ApiService {
     Call<Void> saveAllPhoneBrands(@Body List<PhoneBrand> brands);
 
     @POST("/api/v1/phone/addPhoneDetails")
-    Call<List<PhoneModel>> saveAllPhoneDetails(@Body List<PhoneModel> models);
+    Call<Void> saveAllPhoneDetails(@Body List<PhoneModel> models);
+
+    @POST("/api/v1/phone/notifyUsers")
+    Call<String> notifyUsers(@Body PhoneModel phone);
 }
