@@ -1,7 +1,8 @@
 package com.captaindroid.gsmarena.scrapper.utils;
 
-import com.captaindroid.gsmarena.scrapper.BuildConfig;
 import com.captaindroid.gsmarena.scrapper.services.ApiService;
+
+import org.greenrobot.eventbus.android.BuildConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class Constants {
         if (apiService == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
             if (BuildConfig.DEBUG) {
-                logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+                logging.setLevel(HttpLoggingInterceptor.Level.HEADERS);
             }
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
@@ -33,7 +34,7 @@ public class Constants {
             //httpClient.addInterceptor(new HeaderInterceptor());
             apiService = new Retrofit
                     .Builder()
-                    //.baseUrl("http://192.168.0.109:8081/")
+                    //.baseUrl("http://192.168.10.203:8081/")
                     //.baseUrl("http://10.0.2.2:8081/")
                     .baseUrl("https://foxytool.com/")
                     .addConverterFactory(GsonConverterFactory.create())
